@@ -20,18 +20,13 @@ app.post(['/api/generate', '/server/api/generate', '*/generate'], authMiddleware
     if (user.credits <= 0) return res.status(403).json({ message: 'Insufficient credits. Please upgrade or wait for daily refill.' });
 
     const enhancedPrompt = `${prompt}, in ${style} style`;
-    
-    const response = await axios.post(
-      `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0`,
-      { inputs: enhancedPrompt },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.HF_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        responseType: 'arraybuffer' // Hugging Face returns binary image data
-      }
-    );
+    const [width, height] = (size || '512x512').split('x');
+    const seed = Math.floor(Math.random() * 10000000);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
+
+    const response = await axios.get(pollinationsUrl, {
+      responseType: 'arraybuffer'
+    });
 
     if (!response.data) {
       throw new Error('No image returned from API');
