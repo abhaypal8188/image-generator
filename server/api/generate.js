@@ -22,31 +22,22 @@ app.post(['/api/generate', '/server/api/generate', '*/generate'], authMiddleware
     const enhancedPrompt = `${prompt}, in ${style} style`;
     
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${process.env.GEMINI_API_KEY}`,
-      {
-        instances: [
-          {
-            prompt: enhancedPrompt
-          }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: "1:1",
-          outputMimeType: "image/jpeg"
-        }
-      },
+      `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0`,
+      { inputs: enhancedPrompt },
       {
         headers: {
+          'Authorization': `Bearer ${process.env.HF_API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        responseType: 'arraybuffer' // Hugging Face returns binary image data
       }
     );
 
-    if (!response.data.predictions || response.data.predictions.length === 0) {
-      throw new Error('No image returned from Gemini API');
+    if (!response.data) {
+      throw new Error('No image returned from API');
     }
 
-    const base64Image = response.data.predictions[0].bytesBase64Encoded;
+    const base64Image = Buffer.from(response.data, 'binary').toString('base64');
     const imageUrl = `data:image/jpeg;base64,${base64Image}`;
 
     const newImage = await Image.create({
