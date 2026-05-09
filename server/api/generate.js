@@ -22,7 +22,7 @@ app.post(['/api/generate', '/server/api/generate', '*/generate'], authMiddleware
     const enhancedPrompt = `${prompt}, in ${style} style`;
     
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${process.env.GEMINI_API_KEY}`,
       {
         instances: [
           {
